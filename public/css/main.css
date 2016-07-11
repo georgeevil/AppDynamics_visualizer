@@ -8825,3 +8825,8 @@ textarea {
 
 .fa {
   margin-right: 6px; }
+
+canvas {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none; }

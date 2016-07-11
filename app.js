@@ -75,7 +75,7 @@ function normalizePort(val) {
 /**
  * Express configuration.
  */
-app.set('port', normalizePort(8090));
+app.set('port', normalizePort(8080));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(compression());
@@ -100,7 +100,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use((req, res, next) => {
-  if (req.path === '/api/upload') {
+  if ((req.path === '/api/upload')||(req.path === '/charty/fetchMetricChart')) {
     next();
   } else {
     lusca.csrf()(req, res, next);
@@ -161,8 +161,8 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 /*
  * Charty visualization
 */
-app.get('/charty/visualizer', homeController.viewChart);
-app.post('/charty/fetchMetricChart', homeController.apiCall);
+app.get('/charty/visualizer', chartController.viewChart);
+app.post('/charty/fetchMetricChart', chartController.apiCall);
 
 
 
