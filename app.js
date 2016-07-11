@@ -75,7 +75,7 @@ function normalizePort(val) {
 /**
  * Express configuration.
  */
-app.set('port', normalizePort(8080));
+app.set('port', normalizePort(8090));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(compression());
@@ -159,9 +159,10 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 });
 
 /*
- * Setup charts
+ * Charty visualization
 */
-app.get('/visualizer', homeController.index);
+app.get('/charty/visualizer', homeController.viewChart);
+app.post('/charty/fetchMetricChart', homeController.apiCall);
 
 
 
