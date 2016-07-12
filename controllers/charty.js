@@ -6,13 +6,11 @@ var async = require('async');
  * Visualizer index
  */
 
-
-
 // Visualize
 exports.viewChart = (req, res) => {
-	console.log("View chart");
+	
   res.render('visualizer', {
-    title: 'Visualizer'
+    title: 'Line Chart Visualizer'
   });
 };
 
@@ -20,21 +18,22 @@ exports.viewChart = (req, res) => {
 exports.apiCall = (req, res) => {
 	// Initate respnse object
 	var responseObject = {};
-  console.log("api call");
+	responseObject.title = req.body.title;
+  
 	// Get form data
 	// Host info including port number
 	var hostInfo = req.body.hostInfo;
 	var username = req.body.username;
 	var accountName = req.body.accountName;
 	var password = req.body.password;
-	console.log(JSON.stringify(req.body));
+	
 	// Generate time objects
 	var startTime = new Date(req.body.startTimeInput);
 	var endTime = new Date(req.body.endTimeInput);
-	// Total time interval in seconds:
-	var totalTimeInterval =  (endTime.getTime() - startTime.getTime())/1000;
+	// Total time interval in minutes:
+	var totalTimeInterval =  ((endTime.getTime() - startTime.getTime())/1000)/60;
 	// Divide into 5%s for arbitrary x-axis
-	var varTimeInterval = totalTimeInterval / 20;
+	var varTimeInterval = totalTimeInterval / 4;
 
 	// Cuz I got tired of indenting everything :'(
 	async.waterfall([
@@ -43,29 +42,31 @@ exports.apiCall = (req, res) => {
     function(callback) {
     	// Authentication key generate from 64 encoding + parsing credentials
 			generateAuthKey(username, accountName, password, function(authenticationKey){
-        console.log("Auth: " + authenticationKey);
+        
 				callback(null, authenticationKey);
 			});
     },
     function(authenticationKey, callback) {
     	// Pass on authentication key to authenticating user
-    	authenticateUser(authenticationKey, hostInfo, function(cookieString){
-        console.log("Cookie string: " + cookieString);
+    	authenticateUser(authenticationKey, hostInfo, function(error, cookieString){
+
+     		if (error){
+     			responseObject.error = error.toString();
+					res.send(JSON.stringify(responseObject));
+					return;
+     		}
         callback(null, cookieString, authenticationKey);
+
       });
     },
     function(cookieString, authInfo, callback) {
     	// Do the actual metric browser data request
 			authenticatedRequestOptionGen('http://' + hostInfo +'/controller/restui/metricBrowser/getMetricData', hostInfo, cookieString, authInfo, function(generatedOptions){
-        console.log("options: " + JSON.stringify(generatedOptions));
+        
 				callback(null, generatedOptions);
 			});
     }
 	], function (err, resultingOptions) {
-    console.log("Errors: " + JSON.stringify(err));
-		// Catch errors
-		console.log(resultingOptions);
-
 		// Process metric browser query response
 		// and return as JSON response to API call
 
@@ -74,21 +75,30 @@ exports.apiCall = (req, res) => {
 		responseObject.chartData = [];
 
 		// Run metric data fetching for every 5%
-		async.timesSeries(20, function(i, next) {
+		async.timesSeries(4, function(i, next) {
 			// i is index value
-			var shortEndTime = startTime.getTime() + (varTimeInterval * (i+1));
-			console.log("Short end time for i:" + i + "; short time:" + shortEndTime);
-			metricBrowserDataRequest(resultingOptions, startTime, shortEndTime, Math.round(varTimeInterval), function(requestResult){
+			var n = i+1;
+			var shortEndTime = startTime.getTime() + (varTimeInterval * n * 60 * 1000);
+			console.log("Increment: " + (varTimeInterval*n));
+			
+			metricBrowserDataRequest(resultingOptions, startTime, shortEndTime, Math.round(varTimeInterval), function(error, requestResult){
+				if (error){
+					responseObject.error = error.toString();
+					res.send(JSON.stringify(responseObject));
+					return;
+				}
+
 				// Add to chart data array
-				console.log("Result " + i + ": " + requestResult);
         responseObject.chartData.push(requestResult);
 			});
 
-		}, function(err) {
-      console.log("Final errosr: " + err);
+		}, function(error) {
+ 			if (error){
+				responseObject.error = error.toString();
+				res.send(JSON.stringify(responseObject));
+				return;
+ 			}
 			// After completing all metric chart data requests
-			
-
 		  // Add max value to returned object to gauge maximum value of chart
 			responseObject.maxValue = Math.max.apply(Math, responseObject.chartData);
 			res.send(JSON.stringify(responseObject));
@@ -121,19 +131,23 @@ function authenticatedRequestOptionGen(url, hostInfo, cookieString, authInfo, cb
 	var options = {
 		method: 'POST',
 	  url: url,
+	  gzip: true,
 	  headers: 
 	  { 
 	    'cache-control': 'no-cache',
 	    cookie: cookieString,
+	    encoding: "utf8",
 	    referer: 'http://' + hostInfo +'/controller/',
 	    origin: 'http://' + hostInfo,
 	    host: hostInfo,
 	    'content-type': 'application/json;charset=UTF-8',
 	    'content-length': '', // Fill with length of body content
+
 	    connection: 'keep-alive',
 	    authorization: 'Basic ' + authInfo,
 	    'accept-language': 'en-US,en;q=0.8',
 	    'accept-encoding': 'gzip, deflate',
+	    'accept-charset': 'UTF-8',
 	    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36', // Supposedly bad but meh idgaf
 	    accept: 'application/json, text/plain, */*' 
 	  },
@@ -169,24 +183,34 @@ function authenticateUser(authenticationKey, host, cb){
 	// Send out request
 	request(options, function (error, response, body) {
 		// Ples no
-		console.log("Err: " + error);
-	  // Get the cookies
-	 	var setCookieList = [];
-	  response.headers["set-cookie"].forEach(
-	    function ( cookiestr ) {
-	    	// Parse the cookies (sometimes jsessionid cookie will have extraneous 
-	    	// text at the end of it, so we get rid of the extra part if necessary)
-	    	if (cookiestr != "HttpOnly"){
-	    		setCookieList.push(cookiestr.replace('Path=/controller;','').replace('HttpOnly',''));
-	    	}
-	    	
-	    	
-	    }
-	  );
+		if (error){
+			cb(error, null);
+			return;
+		}
 
-	  var setCookies = setCookieList.join("; "); 
-	  // Returns cookie header string
-	  cb(setCookies.replace(';  ;',';'));
+		try{
+		  // Get the cookies
+		 	var setCookieList = [];
+		  response.headers["set-cookie"].forEach(
+		    function ( cookiestr ) {
+		    	// Parse the cookies (sometimes jsessionid cookie will have extraneous 
+		    	// text at the end of it, so we get rid of the extra part if necessary)
+		    	if (cookiestr != "HttpOnly"){
+		    		setCookieList.push(cookiestr.replace('Path=/controller;','').replace('HttpOnly',''));
+		    	}
+		    	
+		    	
+		    }
+		  );
+
+		  var setCookies = setCookieList.join("; "); 
+		  // Returns cookie header string
+		  cb(null, setCookies.replace(null, ';  ;',';'));
+		}
+		catch (err){
+			cb(err, null);
+			return;
+		}
 	});
 }
 
@@ -198,7 +222,7 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 	// Metric chart data specifications
 
 	// Arbitrary, need to update
-	var metricId = 1237; // Type of request
+	var metricId = 1242; // Type of request
 	var entityId = 5; // User info?
 
 	// Build start and end time strings
@@ -206,37 +230,48 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 	var startTimeObj = new Date(startTime);
 	var startTimeString = 
 		startTimeObj.getFullYear() + "-" + 
-		addZero(startTimeObj.getMonth()) + "-" + 
-		addZero(startTimeObj.getDay()) + "T" + 
+		addZero(startTimeObj.getMonth()+1) + "-" + 
+		addZero(startTimeObj.getDay()+10) + "T" + 
 		addZero(startTimeObj.getHours()) + ":" + 
 		addZero(startTimeObj.getMinutes()) + ":" +
 		addZero(startTimeObj.getSeconds()) + ".000Z";
 	var endTimeObj = new Date(endTime);
 	var endTimeString = 
 		endTimeObj.getFullYear() + "-" + 
-		addZero(endTimeObj.getMonth()) + "-" + 
-		addZero(endTimeObj.getDay()) + "T" + 
+		addZero(endTimeObj.getMonth()+1) + "-" + 
+		addZero(endTimeObj.getDay()+10) + "T" + 
 		addZero(endTimeObj.getHours()) + ":" + 
 		addZero(endTimeObj.getMinutes()) + ":" +
 		addZero(endTimeObj.getSeconds()) + ".000Z";
 
 	// Build JSON body for metric request
-	options.body = '{"metricDataQueries":[{"metricId":' + metricId + ',"entityId":' + entityId + ',"entityType":"APPLICATION"}],"timeRangeSpecifier":{"type":"BETWEEN_TIMES","startTime":"' + startTimeString + '","endTime":"' + endTimeString + '","durationInMinutes":' + Math.ceil(timeInterval) + '},"metricBaseline":null,"maxSize":3000}';
+	options.body = '{"metricDataQueries":[{"metricId":' + metricId + ',"entityId":' + entityId + ',"entityType":"APPLICATION"}],"timeRangeSpecifier":{"type":"BETWEEN_TIMES","startTime":"' + startTimeString + '","endTime":"' + endTimeString + '","durationInMinutes":' + Math.ceil(timeInterval) + '},"metricBaseline":null,"maxSize":1000}';
 
 	// Get length of metric request 
 	options.headers["content-length"] = options.body.length; // Get string length function
 
 	// Send it out!
 
-	console.log("Final options:" + JSON.stringify(options));
+	console.log(JSON.stringify(options));
+
 	request(options, function (error, response, body) {
-		console.log(JSON.toString(body));
+		if (error){
+			callback(error, null);
+			return;
+		}
+		console.log(body);
 		var parsedResp = JSON.parse(body);
 		// We only want to grab a single slice of data
 		// because we already narrowed down the time interval 
-		var timeStamp = parsedResp[0].dataTimeslices[0].startTime;
-		var value = parsedResp[0].dataTimeslices[0].metricValue.value;
-	  callback({"time": timeStamp, "value": value});
+		try {
+			var timeStamp = parsedResp[0].dataTimeslices[0].startTime;
+			var value = parsedResp[0].dataTimeslices[0].metricValue.value;
+		  callback(null, {"time": timeStamp, "value": value});
+		}
+		catch (err){
+			callback(error, null);
+			return;
+		}
 	});
 }
 

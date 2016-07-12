@@ -8,13 +8,16 @@
         span.icon-bar
       a.navbar-brand(href='/')
         i.fa.fa-cube
-        | AppD Visualizer
+        | AppDynamics Visualizer
     .collapse.navbar-collapse
       ul.nav.navbar-nav
         li(class=(title == 'Home') ? 'active' : undefined)
           a(href='/') Home
         li(class=(title == 'Contact') ? 'active' : undefined)
           a(href='/contact') Contact
+        if user
+          li(class=(title == 'Visualizer') ? 'active' : undefined)
+            a(href='/charty/visualizer') Line Chart Visualizer
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title == 'Login') ? 'active' : undefined)
@@ -22,8 +25,6 @@
           li(class=(title == 'Create Account') ? 'active' : undefined)
             a(href='/signup') Create Account
         else
-          li(class=(title == 'Visualizer') ? 'active' : undefined)
-            a(href='/charty/visualizer') Visualize AppD
           li.dropdown(class=(title == 'Account Management') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
               if user.profile.picture

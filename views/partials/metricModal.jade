@@ -1,0 +1,34 @@
+// Modal for adding updated information
+#updateData.modal.fade(tabindex='-1', role='dialog', aria-labelledby='updateData', aria-hidden='true')
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4#updateData.modal-title
+					| Add metric to graph
+			.modal-body
+				form#chartUpdateForm(role='form')
+					.form-group
+						label(for='username') Title
+						input#title.form-control(type='text', name='title', value='Test metric', placeholder='Give your metric a name')
+					.form-group
+						label(for='username') Username
+						input#username.form-control(type='text', name='username', value='ez', placeholder='Your username')
+					.form-group
+						label(for='accountName') Account Name
+						input#accountName.form-control(type='text', name='accountName', value='customer1', placeholder='Default is Customer1')
+					.form-group
+						label(for='password') Password
+						input#password.form-control(type='text', name='password', value='558208121121', placeholder="Account password (we don't store this don't worry)")
+					.form-group
+						label(for='hostInfo') Host Address
+						input#hostInfo.form-control(type='text', name='hostInfo', value='192.168.1.126:8090', placeholder="Ip address/base url (don't include http)")
+					.form-group
+						label(for='startTimeInput') Start time
+						input#startTimeInput.form-control(type='text', name='startTimeInput', value='July 11, 2016 03:21:00', placeholder='Format: October 13, 2014 11:13:00')
+					.form-group
+						label(for='endTimeInput') End time
+						input#endTimeInput.form-control(type='text', name='endTimeInput', value='July 11, 2016 03:23:00', placeholder='Format: October 13, 2014 11:13:00')
+					button#visualizeButton.btn.btn-default Visualize
+			.modal-footer
+				button.btn.btn-default(type='button', data-dismiss='modal')
+					| Cancel
