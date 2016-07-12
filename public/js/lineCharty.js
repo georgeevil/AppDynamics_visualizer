@@ -27,6 +27,7 @@ $("#visualizeButton").click(function(event){
         {
             // Parse response
     		var updatedChartData = JSON.parse(dataJSON);
+            var chartPlotData = new Array();
 
             // Catch errors
             if (updatedChartData.error){
@@ -34,15 +35,19 @@ $("#visualizeButton").click(function(event){
                 return;
             }
 
+            updatedChartData.chartData.forEach(function(entry, index){
+                chartPlotData.push(entry.value);
+            });
+
     		// Update dataset
   			var newDataset = {
-                label: updateChartData.startTime + " to " + updatedChartData.endTime,
+                label: updatedChartData.startTime + " to " + updatedChartData.endTime,
                 borderColor: randomColor(0.4),
                 backgroundColor: randomColor(0.5),
                 pointBorderColor: randomColor(0.7),
                 pointBackgroundColor: randomColor(0.5),
                 pointBorderWidth: 1,
-                data: updatedChartData.rawChartData
+                data: chartPlotData
             };
             config.data.datasets.push(newDataset);
 

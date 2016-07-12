@@ -19,7 +19,9 @@ exports.apiCall = (req, res) => {
 	// Initate respnse object
 	var responseObject = {};
 	responseObject.title = req.body.title;
-  
+	responseObject.startTime = req.body.startTimeInput;
+	responseObject.endTime = req.body.endTimeInput;
+  responseObject.chartData = new Array();
 	// Get form data
 	// Host info including port number
 	var hostInfo = req.body.hostInfo;
@@ -33,7 +35,7 @@ exports.apiCall = (req, res) => {
 	// Total time interval in minutes:
 	var totalTimeInterval =  ((endTime.getTime() - startTime.getTime())/1000)/60;
 	// Divide into 5%s for arbitrary x-axis
-	var varTimeInterval = totalTimeInterval / 4;
+	var varTimeInterval = totalTimeInterval / 6;
 
 	// Cuz I got tired of indenting everything :'(
 	async.waterfall([
@@ -70,38 +72,34 @@ exports.apiCall = (req, res) => {
 		// Process metric browser query response
 		// and return as JSON response to API call
 
-		// Response object chart data array of 20 values at 
-		// every 5% time interval
-		responseObject.chartData = [];
 
-		// Run metric data fetching for every 5%
-		async.timesSeries(4, function(i, next) {
+		// Run metric data fetching for every 20%
+		async.timesSeries(5, function(i, next) {
 			// i is index value
 			var n = i+1;
 			var shortEndTime = startTime.getTime() + (varTimeInterval * n * 60 * 1000);
-			console.log("Increment: " + (varTimeInterval*n));
-			
-			metricBrowserDataRequest(resultingOptions, startTime, shortEndTime, Math.round(varTimeInterval), function(error, requestResult){
+			var shortStartTime = startTime.getTime() + (varTimeInterval * i * 60 * 1000);
+
+			metricBrowserDataRequest(resultingOptions, shortStartTime, shortEndTime, Math.round(varTimeInterval), function(error, requestResult){
 				if (error){
 					responseObject.error = error.toString();
 					res.send(JSON.stringify(responseObject));
 					return;
 				}
-
 				// Add to chart data array
         responseObject.chartData.push(requestResult);
+        next();
 			});
 
-		}, function(error) {
- 			if (error){
-				responseObject.error = error.toString();
-				res.send(JSON.stringify(responseObject));
-				return;
- 			}
+
+		}, function(error){
+
 			// After completing all metric chart data requests
 		  // Add max value to returned object to gauge maximum value of chart
 			responseObject.maxValue = Math.max.apply(Math, responseObject.chartData);
-			res.send(JSON.stringify(responseObject));
+			console.log("Resp: " + JSON.stringify(responseObject));
+			res.send(JSON.stringify(responseObject));      
+
 		});
 
 	});
@@ -222,7 +220,7 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 	// Metric chart data specifications
 
 	// Arbitrary, need to update
-	var metricId = 1242; // Type of request
+	var metricId = 1236; // Type of request
 	var entityId = 5; // User info?
 
 	// Build start and end time strings
@@ -259,8 +257,8 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 			callback(error, null);
 			return;
 		}
-		console.log(body);
 		var parsedResp = JSON.parse(body);
+		console.log("Parsed response:" + JSON.stringify(parsedResp));
 		// We only want to grab a single slice of data
 		// because we already narrowed down the time interval 
 		try {
@@ -269,6 +267,7 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 		  callback(null, {"time": timeStamp, "value": value});
 		}
 		catch (err){
+			console.log("Finding error");
 			callback(error, null);
 			return;
 		}
