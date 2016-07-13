@@ -162,7 +162,7 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
  * Charty visualization
 */
 app.get('/charty/visualizer', chartController.viewChart);
-app.post('/charty/fetchMetricChart', chartController.apiCall);
+app.post('/charty/fetchMetricChart', chartController.fakeApiCallForDemo);
 
 
 

@@ -12,12 +12,9 @@ $.ajaxSetup({
     }
 });
 
-addMetricToList(randomColor(0.9), "Metrics:");
-
 // Update chart data ajax after modal form submission
 $("#visualizeButton").click(function(event){
     event.preventDefault();
-    alert($('form').serialize());
     
     $.ajax({
         type: "POST",
@@ -39,27 +36,29 @@ $("#visualizeButton").click(function(event){
                 chartPlotData.push(entry.value);
             });
 
+            var primaryColor = randomColor(0.7);
+
     		// Update dataset
   			var newDataset = {
-                label: updatedChartData.startTime + " to " + updatedChartData.endTime,
-                borderColor: randomColor(0.4),
-                backgroundColor: randomColor(0.5),
-                pointBorderColor: randomColor(0.7),
-                pointBackgroundColor: randomColor(0.5),
+                label: updatedChartData.title + ": " + updatedChartData.startTime + " to " + updatedChartData.endTime,
+                borderColor: primaryColor,
+                backgroundColor: primaryColor,
+                pointBorderColor: primaryColor,
+                pointBackgroundColor: primaryColor,
                 pointBorderWidth: 1,
                 data: chartPlotData
             };
             config.data.datasets.push(newDataset);
 
-            addMetricToList(borderColor, updatedChartData.title);
+            addMetricToList(primaryColor, updatedChartData.title);
 
             // Update y axis max-value if data-set's max value exceeds current max value
-            var maxYValue = updatedChartData.suggestedMax;
+            var maxYValue = updatedChartData.maxValue;
             config.options.scales.yAxes[0].ticks.suggestedMax = (config.options.scales.yAxes[0].ticks.suggestedMax > maxYValue) ? config.options.scales.yAxes[0].ticks.suggestedMax : maxYValue;
             
             // Update the graph
             window.myLine.update();
-
+            $('#updateData').modal('hide');
 
 
 	   }
@@ -71,7 +70,7 @@ var config = {
     type: 'line',
     data: {
         // x-axis labels are increments of 5 percent
-        labels: ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"],
+        labels: ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"],
         datasets: []
     },
     options: {
@@ -132,15 +131,26 @@ window.onload = function() {
 function addMetricToList(color, name) {
     var ul = document.getElementById("metricsList");
     var li = document.createElement("li");
-    li.setAttribute("id", "metric"+ul.children.length);
+    li.setAttribute("id", "metric"+(ul.children.length-1));
     li.setAttribute("class", "list-group-item");
     li.style.borderColor =  color;
     li.appendChild(document.createTextNode(name));
+    var deleteButton = $("<button />").addClass("deleteButton btn btn-danger").text("x");
+    $(deleteButton).attr("style", "text-align:right;  margin-right:10px; padding-left:3px; padding-top:0px; padding-bottom:2px; padding-right:3px; font-size:8px; margin-top:-3px;");
+    $(deleteButton).attr("onclick", "deleteMetric(this)");
+    deleteButton.prependTo(li);
     ul.appendChild(li);
+}
+
+// Delete the metric
+function deleteMetric(deleteButton){
+    deleteButton.parentNode.parentNode.removeChild(deleteButton.parentNode);
+    config.data.datasets.splice(deleteButton.parentNode.getAttribute("id").replace("metric",""),1);
+    window.myLine.update();
 }
 
 // Remove last added data set
 $('#removeDataset').click(function() {
     config.data.datasets.splice(0, 1);
-    window.myLine.update();
+    
 });

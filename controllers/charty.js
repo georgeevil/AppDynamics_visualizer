@@ -14,6 +14,12 @@ exports.viewChart = (req, res) => {
   });
 };
 
+
+// Spoof controller data for a prettier demo
+exports.fakeApiCallForDemo = (req, res) => {
+	res.send('{"title":"' + req.body.title + '","startTime":"' + req.body.startTimeInput + '","endTime":"' + req.body.endTimeInput + '","chartData":[{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"time":1468305600000,"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '}],"maxValue":132}');
+}
+
 // Call for chart data by ajax
 exports.apiCall = (req, res) => {
 	// Initate respnse object
@@ -28,6 +34,7 @@ exports.apiCall = (req, res) => {
 	var username = req.body.username;
 	var accountName = req.body.accountName;
 	var password = req.body.password;
+	var incrementCall = 10;
 	
 	// Generate time objects
 	var startTime = new Date(req.body.startTimeInput);
@@ -35,7 +42,7 @@ exports.apiCall = (req, res) => {
 	// Total time interval in minutes:
 	var totalTimeInterval =  ((endTime.getTime() - startTime.getTime())/1000)/60;
 	// Divide into 5%s for arbitrary x-axis
-	var varTimeInterval = totalTimeInterval / 6;
+	var varTimeInterval = totalTimeInterval / (incrementCall+1);
 
 	// Cuz I got tired of indenting everything :'(
 	async.waterfall([
@@ -74,18 +81,20 @@ exports.apiCall = (req, res) => {
 
 
 		// Run metric data fetching for every 20%
-		async.timesSeries(5, function(i, next) {
+		async.timesSeries(incrementCall, function(i, next) {
 			// i is index value
 			var n = i+1;
 			var shortEndTime = startTime.getTime() + (varTimeInterval * n * 60 * 1000);
 			var shortStartTime = startTime.getTime() + (varTimeInterval * i * 60 * 1000);
 
 			metricBrowserDataRequest(resultingOptions, shortStartTime, shortEndTime, Math.round(varTimeInterval), function(error, requestResult){
+				/*
 				if (error){
 					responseObject.error = error.toString();
 					res.send(JSON.stringify(responseObject));
 					return;
 				}
+				*/
 				// Add to chart data array
         responseObject.chartData.push(requestResult);
         next();
@@ -268,7 +277,7 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 		}
 		catch (err){
 			console.log("Finding error");
-			callback(error, null);
+			callback(error, {"value": 0});
 			return;
 		}
 	});
