@@ -18,16 +18,25 @@
 						input#accountName.form-control(type='text', name='accountName', value='customer1', placeholder='Default is Customer1')
 					.form-group
 						label(for='password') Password
-						input#password.form-control(type='text', name='password', value='558208121121', placeholder="Account password (we don't store this don't worry)")
+						input#password.form-control(type='text', name='password', value='558208121121', placeholder="Account password")
 					.form-group
 						label(for='hostInfo') Host Address
-						input#hostInfo.form-control(type='text', name='hostInfo', value='192.168.1.126:8090', placeholder="Ip address/base url (don't include http)")
+						input#hostInfo.form-control(type='text', name='hostInfo', value='192.168.1.126:8090', placeholder="Ip address/domain + port (don't include http)")
 					.form-group
-						label(for='startTimeInput') Start time
-						input#startTimeInput.form-control(type='text', name='startTimeInput', value='July 12, 2016 06:34:00', placeholder='Format: October 13, 2014 11:13:00')
+						label(for='startTimeInput') UTC Start time
+						input#startTimeInput.form-control(type='text', name='startTimeInput', value='July 13, 2016 02:07:00', placeholder='Format: October 13, 2014 11:13:00')
 					.form-group
-						label(for='endTimeInput') End time
-						input#endTimeInput.form-control(type='text', name='endTimeInput', value='July 12, 2016 06:49:00', placeholder='Format: October 13, 2014 11:13:00')
+						label(for='endTimeInput') UTC End time
+						input#endTimeInput.form-control(type='text', name='endTimeInput', value='July 13, 2016 02:30:00', placeholder='Format: October 13, 2014 11:13:00')
+					.form-group
+						label(for='metricId') Metric ID
+						input#hostInfo.form-control(type='text', name='metricId', value='1235', placeholder="")
+					.form-group
+						label(for='entityId') Entity ID
+						input#hostInfo.form-control(type='text', name='entityId', value='5', placeholder="")
+					.form-group
+						label(for='entityType') Entity Type
+						input#hostInfo.form-control(type='text', name='entityType', value='APPLICATION', placeholder="")
 					button#visualizeButton.btn.btn-default Visualize
 			.modal-footer
 				button.btn.btn-default(type='button', data-dismiss='modal')

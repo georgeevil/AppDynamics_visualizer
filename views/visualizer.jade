@@ -1,9 +1,9 @@
 extends layout
 
 block content
-	h1 Line chart visualizer
-	include visualizer.html
+	h1 Visualizer
+	include partials/visualizer.jade
 	include partials/metricModal.jade
 
 block customJS
-	script(src='/js/lineCharty.js')
+	include partials/visualizerJS.jade

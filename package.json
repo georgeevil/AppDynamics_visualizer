@@ -33,6 +33,7 @@
     "lodash": "^4.12.0",
     "lusca": "^1.4.1",
     "mongoose": "^4.4.17",
+    "mongoose-sanitizer": "^1.0.0",
     "morgan": "^1.7.0",
     "multer": "^1.1.0",
     "node-foursquare": "^0.3.0",

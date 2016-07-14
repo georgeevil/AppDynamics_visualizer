@@ -32,6 +32,7 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const chartController = require('./controllers/charty');
+const graphController = require('./controllers/graph');
 
 
 /**
@@ -100,7 +101,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use((req, res, next) => {
-  if ((req.path === '/api/upload')||(req.path === '/charty/fetchMetricChart')) {
+  if ((req.path === '/api/upload')||(req.path === '/api/visualizer/fetchMetricData')||(req.path === '/api/visualizer/save')) {
     next();
   } else {
     lusca.csrf()(req, res, next);
@@ -161,9 +162,15 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 /*
  * Charty visualization
 */
-app.get('/charty/visualizer', chartController.viewChart);
-app.post('/charty/fetchMetricChart', chartController.fakeApiCallForDemo);
+app.get('/visualizer', chartController.viewChart);
+// app.post('/charty/fetchMetricChart', chartController.fakeApiCallForDemo);
+app.post('/api/visualizer/fetchMetricData', chartController.apiCall);
 
+/*
+ * Charts saved
+*/
+app.get("/visualizer/:graphID", graphController.viewGraph);
+app.post("/api/visualizer/save", graphController.saveGraph);
 
 
 

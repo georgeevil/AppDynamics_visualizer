@@ -8,20 +8,23 @@ var async = require('async');
 
 // Visualize
 exports.viewChart = (req, res) => {
-	
+	if (!req.user) {
+    return res.redirect('/');
+  }
   res.render('visualizer', {
-    title: 'Line Chart Visualizer'
+    title: 'Visualizer',
+    config: "{ type: \'line\', data: { labels: [\"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"100\"], datasets: [] }, options: { responsive: true, title:{ display:true, text:\'AppDynamics Visualizer\' }, tooltips: { mode: \'label\', callbacks: { } }, hover: { mode: \'dataset\' }, scales: { xAxes: [{ display: true, scaleLabel: { display: true, labelString: \'Percentage of time elapsed of time interval\' } }], yAxes: [{ display: true, scaleLabel: { display: true, labelString: \'Traffic\' }, ticks: { suggestedMin: 0, suggestedMax: 250, }}]}}}"
   });
 };
 
 
 // Spoof controller data for a prettier demo
-exports.fakeApiCallForDemo = (req, res) => {
+exports.apiCall = (req, res) => {
 	res.send('{"title":"' + req.body.title + '","startTime":"' + req.body.startTimeInput + '","endTime":"' + req.body.endTimeInput + '","chartData":[{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"time":1468305600000,"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '}],"maxValue":132}');
 }
 
 // Call for chart data by ajax
-exports.apiCall = (req, res) => {
+exports.rapiCall = (req, res) => {
 	// Initate respnse object
 	var responseObject = {};
 	responseObject.title = req.body.title;
@@ -34,6 +37,9 @@ exports.apiCall = (req, res) => {
 	var username = req.body.username;
 	var accountName = req.body.accountName;
 	var password = req.body.password;
+	var metricId = req.body.metricId;
+	var entityId = req.body.entityId;
+	var entityType = req.body.entityType;
 	var incrementCall = 10;
 	
 	// Generate time objects
@@ -87,7 +93,7 @@ exports.apiCall = (req, res) => {
 			var shortEndTime = startTime.getTime() + (varTimeInterval * n * 60 * 1000);
 			var shortStartTime = startTime.getTime() + (varTimeInterval * i * 60 * 1000);
 
-			metricBrowserDataRequest(resultingOptions, shortStartTime, shortEndTime, Math.round(varTimeInterval), function(error, requestResult){
+			metricBrowserDataRequest(resultingOptions, shortStartTime, shortEndTime, Math.round(varTimeInterval), metricId, entityId, entityType, function(error, requestResult){
 				/*
 				if (error){
 					responseObject.error = error.toString();
@@ -225,12 +231,7 @@ function authenticateUser(authenticationKey, host, cb){
 
 // Send request for metric browser chart data, across a set time interval
 // returns a single data value for a short time interval that is used for plotting
-function metricBrowserDataRequest(options, startTime, endTime, timeInterval, callback){
-	// Metric chart data specifications
-
-	// Arbitrary, need to update
-	var metricId = 1236; // Type of request
-	var entityId = 5; // User info?
+function metricBrowserDataRequest(options, startTime, endTime, timeInterval, metricId, entityId, entityType, callback){
 
 	// Build start and end time strings
 	// EX "2016-07-10T06:08:00.000Z"
@@ -252,7 +253,7 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 		addZero(endTimeObj.getSeconds()) + ".000Z";
 
 	// Build JSON body for metric request
-	options.body = '{"metricDataQueries":[{"metricId":' + metricId + ',"entityId":' + entityId + ',"entityType":"APPLICATION"}],"timeRangeSpecifier":{"type":"BETWEEN_TIMES","startTime":"' + startTimeString + '","endTime":"' + endTimeString + '","durationInMinutes":' + Math.ceil(timeInterval) + '},"metricBaseline":null,"maxSize":1000}';
+	options.body = '{"metricDataQueries":[{"metricId":' + metricId + ',"entityId":' + entityId + ',"entityType":"' + entityType + '"}],"timeRangeSpecifier":{"type":"BETWEEN_TIMES","startTime":"' + startTimeString + '","endTime":"' + endTimeString + '","durationInMinutes":' + Math.ceil(timeInterval) + '},"metricBaseline":null,"maxSize":1000}';
 
 	// Get length of metric request 
 	options.headers["content-length"] = options.body.length; // Get string length function
@@ -267,7 +268,6 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 			return;
 		}
 		var parsedResp = JSON.parse(body);
-		console.log("Parsed response:" + JSON.stringify(parsedResp));
 		// We only want to grab a single slice of data
 		// because we already narrowed down the time interval 
 		try {
@@ -277,7 +277,7 @@ function metricBrowserDataRequest(options, startTime, endTime, timeInterval, cal
 		}
 		catch (err){
 			console.log("Finding error");
-			callback(error, {"value": 0});
+			callback(error, {"value": null});
 			return;
 		}
 	});
