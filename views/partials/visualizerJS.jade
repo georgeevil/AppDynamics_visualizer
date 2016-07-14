@@ -57,7 +57,6 @@ script.
   });
   // Update chart data ajax after short modal form submission
   $("#shortVisualizeButton").click(function(event){
-    alert($("#shortChartUpdateForm").serialize());
   event.preventDefault();
   $.ajax({
   type: "POST",
@@ -102,10 +101,6 @@ script.
   window.onload = function() {
   // Update colors for each dataset
   $.each(config.data.datasets, function(i, dataset) {
-  dataset.borderColor = randomColor(0.4);
-  dataset.backgroundColor = randomColor(0.5);
-  dataset.pointBorderColor = randomColor(0.7);
-  dataset.pointBackgroundColor = randomColor(0.5);
   dataset.pointBorderWidth = 1;
   });
   var ctx = document.getElementById("canvas").getContext("2d");
@@ -139,10 +134,10 @@ script.
   saveGraphApi($('#saveGraphName').val());
   });
   function saveGraphApi(title){
-  nonCircConfig = { type: 'line', data: { labels: config.data.labels, datasets: [] }, options: { responsive: true, title:{ display:true, text:'AppDynamics Visualizer' }, tooltips: { mode: 'label', callbacks: { } }, hover: { mode: 'dataset' }, scales: { xAxes: [{ display: true, scaleLabel: { display: true, labelString: 'Percentage of time elapsed of time interval' } }], yAxes: [{ display: true, scaleLabel: { display: true, labelString: 'Traffic' }, ticks: { suggestedMin: 0, suggestedMax: config.options.scales.yAxes[0].ticks.suggestedMax}}]}}};
+  nonCircConfig = { type: 'line', data: { labels: config.data.labels, datasets: [] }, options: config.options};
 
   config.data.datasets.forEach(function(value, index){
-  nonCircConfig.data.datasets.push({label:value.label, backgroundColor:value.backgroundColor, borderColor:value.borderColor, data:value.data, pointBackgroundColor:value.pointBackgroundColor, pointBorderColor:value.pointBorderColor, pointBorderWidth:value.pointBorderWidth});
+  nonCircConfig.data.datasets.push({label:value.label, backgroundColor:value.borderColor, borderColor:value.borderColor, data:value.data, pointBackgroundColor:value.borderColor, pointBorderColor:value.borderColor, pointBorderWidth:value.pointBorderWidth});
   });
   $.ajax({
   type: "POST",

@@ -13,18 +13,18 @@ exports.viewChart = (req, res) => {
   }
   res.render('visualizer', {
     title: 'Visualizer',
-    config: "{ type: \'line\', data: { labels: [\"10%\", \"20%\", \"30%\", \"40%\", \"50%\", \"60%\", \"70%\", \"80%\", \"90%\", \"100%\"], datasets: [] }, options: { responsive: true, title:{ display:true, text:\'AppDynamics Visualizer\' }, tooltips: { mode: \'label\', callbacks: { } }, hover: { mode: \'dataset\' }, scales: { xAxes: [{ display: true, scaleLabel: { display: true, labelString: \'Percentage of time elapsed of time interval\' } }], yAxes: [{ display: true, scaleLabel: { display: true, labelString: \'Traffic\' }, ticks: { suggestedMin: 0, suggestedMax: 250, }}]}}}"
+    config: "{ type: \'line\', data: { labels: [\"10%\", \"20%\", \"30%\", \"40%\", \"50%\", \"60%\", \"70%\", \"80%\", \"90%\", \"100%\"], datasets: [] }, options: { fontColor:\"#fff\", responsive: true, title:{ display:true, text:\'AppDynamics Visualizer\' }, tooltips: { mode: \'label\', callbacks: { } }, hover: { mode: \'dataset\' }, scales: { xAxes: [{ display: true, scaleLabel: { display: true, labelString: \'Percentage of time elapsed of time interval\' } }], yAxes: [{ display: true, scaleLabel: { display: true, labelString: \'Traffic\' }, ticks: { suggestedMin: 0, suggestedMax: 100, }}]}}}"
   });
 };
 
 
 // Spoof controller data for a prettier demo
-exports.rapiCall = (req, res) => {
-	res.send('{"title":"' + req.body.title + '","startTime":"' + req.body.startTimeInput + '","endTime":"' + req.body.endTimeInput + '","chartData":[{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"time":1468305600000,"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '}],"maxValue":132}');
+exports.apiCall = (req, res) => {
+	res.send('{"title":"' + req.body.title + '","startTime":"' + req.body.startTimeInput + '","endTime":"' + req.body.endTimeInput + '","chartData":[{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"time":1468305600000,"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '},{"value":' + Math.random()*100 + '}],"maxValue":232}');
 }
 
 // Call for chart data by ajax
-exports.apiCall = (req, res) => {
+exports.rapiCall = (req, res) => {
 	// Initate respnse object
 	var responseObject = {};
 	responseObject.title = req.body.title;
