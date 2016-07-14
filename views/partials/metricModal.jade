@@ -8,7 +8,7 @@
 			.modal-body
 				form#chartUpdateForm(role='form')
 					.form-group
-						label(for='username') Title
+						label(for='title') Title
 						input#title.form-control(type='text', name='title', value='Test metric', placeholder='Give your metric a name')
 					.form-group
 						label(for='username') Username
@@ -38,6 +38,41 @@
 						label(for='entityType') Entity Type
 						input#hostInfo.form-control(type='text', name='entityType', value='APPLICATION', placeholder="")
 					button#visualizeButton.btn.btn-default Visualize
+			.modal-footer
+				button.btn.btn-default(type='button', data-dismiss='modal')
+					| Cancel
+
+// Modal for adding updated information
+#shortUpdateData.modal.fade(tabindex='-1', role='dialog', aria-labelledby='shortUpdateData', aria-hidden='true')
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4#shortUpdateData.modal-title
+					| Add metric to graph
+			.modal-body
+				form#shortChartUpdateForm(role='form')
+					.form-group
+						label(for='shorttitle') Title
+						input#shorttitle.form-control(type='text', name='title', value='Test metric', placeholder='Give your metric a name')
+					.form-group
+						label(for='shortusername') Username
+						input#shortusername.form-control(type='text', name='username', value='ez', placeholder='Your username')
+					.form-group
+						label(for='shortaccountName') Account Name
+						input#shortaccountName.form-control(type='text', name='accountName', value='customer1', placeholder='Default is Customer1')
+					.form-group
+						label(for='shortpassword') Password
+						input#shortpassword.form-control(type='text', name='password', value='558208121121', placeholder="Account password")
+					.form-group
+						label(for='shortstartTimeInput') UTC Start time
+						input#shortstartTimeInput.form-control(type='text', name='startTimeInput', value='July 13, 2016 02:07:00', placeholder='Format: October 13, 2014 11:13:00')
+					.form-group
+						label(for='shortendTimeInput') UTC End time
+						input#shortendTimeInput.form-control(type='text', name='endTimeInput', value='July 13, 2016 02:30:00', placeholder='Format: October 13, 2014 11:13:00')
+					.form-group
+						label(for='apiPreRegString') API Call String
+						input#apiPreRegString.form-control(type='text', name='apiPreRegString', value='http://192.168.1.126:8090/controller/#/location=METRIC_BROWSER&timeRange=last_15_minutes.BEFORE_NOW.-1.-1.15&application=5&metrics=APPLICATION.5.1240', placeholder="See instructions")
+					button#shortVisualizeButton.btn.btn-default Visualize
 			.modal-footer
 				button.btn.btn-default(type='button', data-dismiss='modal')
 					| Cancel

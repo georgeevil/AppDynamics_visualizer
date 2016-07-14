@@ -19,7 +19,7 @@ script.
   $.ajax({
   type: "POST",
   url: 'http://localhost:8080/api/visualizer/fetchMetricData',
-  data: $("form").serialize(), // serializes the form's elements.
+  data: $("#chartUpdateForm").serialize(), // serializes the form's elements.
   success: function(dataJSON)
   {
   // Parse response
@@ -55,6 +55,49 @@ script.
   }
   });
   });
+  // Update chart data ajax after short modal form submission
+  $("#shortVisualizeButton").click(function(event){
+    alert($("#shortChartUpdateForm").serialize());
+  event.preventDefault();
+  $.ajax({
+  type: "POST",
+  url: 'http://localhost:8080/api/visualizer/fetchMetricData',
+  data: $("#shortChartUpdateForm").serialize(), // serializes the form's elements.
+  success: function(dataJSON)
+  {
+  // Parse response
+  var updatedChartData = JSON.parse(dataJSON);
+  var chartPlotData = new Array();
+  // Catch errors
+  if (updatedChartData.error){
+  alert(updatedChartData.error);
+  return;
+  }
+  updatedChartData.chartData.forEach(function(entry, index){
+  chartPlotData.push(entry.value);
+  });
+  var primaryColor = randomColor(0.7);
+  // Update dataset
+  var newDataset = {
+  label: updatedChartData.title + ": " + updatedChartData.startTime + " to " + updatedChartData.endTime,
+  borderColor: primaryColor,
+  backgroundColor: primaryColor,
+  pointBorderColor: primaryColor,
+  pointBackgroundColor: primaryColor,
+  pointBorderWidth: 1,
+  data: chartPlotData
+  };
+  config.data.datasets.push(newDataset);
+  addMetricToList(primaryColor, updatedChartData.title);
+  // Update y axis max-value if data-set's max value exceeds current max value
+  var maxYValue = updatedChartData.maxValue;
+  config.options.scales.yAxes[0].ticks.suggestedMax = (config.options.scales.yAxes[0].ticks.suggestedMax > maxYValue) ? config.options.scales.yAxes[0].ticks.suggestedMax : maxYValue;
+  // Update the graph
+  window.myLine.update();
+  $('#shortUpdateData').modal('hide');
+  }
+  });
+  });
   // Initializer
   window.onload = function() {
   // Update colors for each dataset
@@ -77,7 +120,7 @@ script.
   li.style.borderColor =  color;
   li.appendChild(document.createTextNode(name));
   var deleteButton = $("<button />").addClass("deleteButton btn btn-danger").text("x");
-  $(deleteButton).attr("style", "text-align:right;  margin-right:10px; padding-left:3px; padding-top:0px; padding-bottom:2px; padding-right:3px; font-size:8px; margin-top:-3px;");
+  $(deleteButton).attr("style", "text-align:right; border-bottom-left-radius:0px; border-bottom-right-radius:0px; margin-right:10px; padding-left:3px; padding-top:0px; padding-bottom:2px; padding-right:3px; font-size:8px; margin-top:-3px;");
   $(deleteButton).attr("onclick", "deleteMetric(this)");
   deleteButton.prependTo(li);
   ul.appendChild(li);
@@ -109,10 +152,18 @@ script.
   {
   var dataJSON = JSON.parse(rawData);
   if (dataJSON.valid == "false"){
+  if (typeof dataJSON.msg.errors != 'undefined'){
   alert("Error:" + JSON.stringify(dataJSON.msg.errors.name.message));
+  } else {
+  alert("Error:" + JSON.stringify(dataJSON.msg));
+  }
+  
   } else {
   window.location = "http://localhost:8080/visualizer/" + dataJSON.msg;
   }
   }
   });
   }
+  $('input').click(function() {
+  $(this).select(); 
+  });

@@ -1,18 +1,31 @@
 br
 .row
-  .col-md-8.col-lg-8.col-sm-12
+  .col-md-9.col-lg-9.col-sm-12
+    h1
+      #{authorString}
+
     div(style='width:100%;')
       canvas#canvas
+    <br>
+    if typeof(graphId) != 'undefined'
+      .input-group(style="margin-bottom:10px;margin: 0px;")
+        span#copyURL.input-group-addon URL:
+        input.form-control(type="text", value=graphId, readonly="readonly", style="width:100%; margin: 0px;", aria-describedby='copyURL')
     br
     br
-  .col-md-3.col-md-offset-1.col-lg-3.col-lg-offset-1.col-sm-12
+  .col-md-3.col-lg-3.col-sm-12
     .input-group
       input#saveGraphName.form-control(type='text', placeholder='Custom URL', aria-describedby='shareAddon')
       span#shareAddon.input-group-btn
         button#saveThisGraph.btn.btn-secondary(type='button') Share
     br
-    ul#metricsList.list-group
+    ul#metricsList.list-group(style="margin:0px;")
       li.list-group-item
         | Metrics:
-    button.btn.btn-primary(style='width:100%', data-toggle='modal', data-target='#updateData')
-      | Add Data
+    .div(style="padding:0px;margin:0px;")
+      .col-xs-6(style="padding:0px;margin:0px;")
+          button.btn.btn-primary(style='width:100%', data-toggle='modal', data-target='#updateData')
+            | Add Data
+      .col-xs-6(style="padding:0px;margin:0px;")
+          button.btn.btn-primary(style='width:100%', data-toggle='modal', data-target='#shortUpdateData')
+            | Quick add

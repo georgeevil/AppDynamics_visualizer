@@ -7,7 +7,7 @@ var sanitizerPlugin = require("mongoose-sanitizer");
 var graphSchema = new Schema({
     name: {
         type: String,
-        unique: true
+        trim: true
     },
 	author:{
 		type: mongoose.Schema.Types.ObjectId,

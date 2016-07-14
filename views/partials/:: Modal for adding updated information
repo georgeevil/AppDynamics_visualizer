@@ -1,0 +1,43 @@
+// Modal for adding updated information
+#shortUpdateData.modal.fade(tabindex='-1', role='dialog', aria-labelledby='shortUpdateData', aria-hidden='true')
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4#shortUpdateData.modal-title
+					| Add metric to graph
+			.modal-body
+				form#shortChartUpdateForm(role='form')
+					.form-group
+						label(for='shorttitle') Title
+						input#shorttitle.form-control(type='text', name='title', value='Test metric', placeholder='Give your metric a name')
+					.form-group
+						label(for='shortusername') Username
+						input#shortusername.form-control(type='text', name='username', value='ez', placeholder='Your username')
+					.form-group
+						label(for='shortaccountName') Account Name
+						input#shortaccountName.form-control(type='text', name='accountName', value='customer1', placeholder='Default is Customer1')
+					.form-group
+						label(for='shortpassword') Password
+						input#shortpassword.form-control(type='text', name='password', value='558208121121', placeholder="Account password")
+					.form-group
+						label(for='shorthostInfo') Host Address
+						input#shorthostInfo.form-control(type='text', name='hostInfo', value='192.168.1.126:8090', placeholder="Ip address/domain + port (don't include http)")
+					.form-group
+						label(for='shortstartTimeInput') UTC Start time
+						input#shortstartTimeInput.form-control(type='text', name='startTimeInput', value='July 13, 2016 02:07:00', placeholder='Format: October 13, 2014 11:13:00')
+					.form-group
+						label(for='shortendTimeInput') UTC End time
+						input#shortendTimeInput.form-control(type='text', name='endTimeInput', value='July 13, 2016 02:30:00', placeholder='Format: October 13, 2014 11:13:00')
+					.form-group
+						label(for='shortmetricId') Metric ID
+						input#shorthostInfo.form-control(type='text', name='metricId', value='1235', placeholder="")
+					.form-group
+						label(for='shortentityId') Entity ID
+						input#shorthostInfo.form-control(type='text', name='entityId', value='5', placeholder="")
+					.form-group
+						label(for='shortentityType') Entity Type
+						input#shorthostInfo.form-control(type='text', name='entityType', value='APPLICATION', placeholder="")
+					button#visualizeButton.btn.btn-default Visualize
+			.modal-footer
+				button.btn.btn-default(type='button', data-dismiss='modal')
+					| Cancel
